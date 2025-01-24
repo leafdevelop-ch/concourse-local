@@ -1,0 +1,49 @@
+jobs:
+  - name: test
+    plan:
+      - get: source-code
+        trigger: true
+      - config:
+          caches:
+            - path: $HOME/.m2/repository
+            - path: $HOME/.gradle/caches/
+            - path: $HOME/.gradle/wrapper/
+          container_limits: {}
+          image_resource:
+            name: ""
+            source:
+              repository: maven
+              tag: 3.9.9-amazoncorretto-21
+            type: registry-image
+          inputs:
+            - name: source-code
+          platform: linux
+          run:
+            args:
+              - -c
+              - |
+                java -Xmx32m -version
+                javac -J-Xmx32m -version
+                
+                cd source-code
+                ./mvnw clean test
+            path: /bin/sh
+            user: root
+        task: run-tests
+    public: true
+
+resources:
+  - name: source-code
+    icon: github
+    type: git
+    source:
+      uri: git@github.com:leafdevelop-ch/springboot-starter-ci.git
+      branch: develop
+      private_key: ((github-ssh-key))
+      git_config:
+        - name: safe.directory
+          value: /tmp/build/get
+
+---
+
+
