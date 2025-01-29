@@ -11,7 +11,6 @@ services:
     image: concourse/concourse
     command: quickstart
     privileged: true
-    cgroup: host
     depends_on: [concourse-db]
     platform: linux/amd64
     ports: ["8080:8080"]
@@ -24,6 +23,7 @@ services:
       CONCOURSE_ADD_LOCAL_USER: lfarmer:lfarmer
       CONCOURSE_MAIN_TEAM_LOCAL_USER: lfarmer
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
+      CONCOURSE_WORKER_BAGGAGECLAIM_DISABLE_USER_NAMESPACES: true
       CONCOURSE_CLIENT_SECRET: Y29uY291cnNlLXdlYgo=
       CONCOURSE_TSA_CLIENT_SECRET: Y29uY291cnNlLXdvcmtlcgo=
       CONCOURSE_X_FRAME_OPTIONS: allow

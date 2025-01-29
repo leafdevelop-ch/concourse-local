@@ -1,0 +1,67 @@
+jobs:
+  - name: pr-test
+    plan:
+      - get: pull-request
+        trigger: true
+        version: every
+      - put: pull-request
+        params:
+          path: pull-request
+          status: pending
+      - task: run-tests
+        config:
+          caches:
+            - path: $HOME/.m2/repository
+            - path: $HOME/.gradle/caches/
+            - path: $HOME/.gradle/wrapper/
+          container_limits: {}
+          image_resource:
+            name: ""
+            source:
+              repository: maven
+              tag: 3.9.9-amazoncorretto-21
+            type: registry-image
+          inputs:
+            - name: pull-request
+          platform: linux
+          run:
+            args:
+              - -c
+              - |
+                java -Xmx32m -version
+                javac -J-Xmx32m -version
+                
+                cd pull-request
+                ./mvnw clean test
+            path: /bin/sh
+            user: root
+        on_failure:
+          put: pull-request
+          params:
+            path: pull-request
+            status: failure
+      - put: pull-request
+        params:
+          path: pull-request
+          status: success
+    public: true
+
+resource_types:
+  - name: pull-request
+    type: registry-image
+    source:
+      repository: cfcommunity/github-pr-resource
+
+resources:
+  - name: pull-request
+    type: pull-request
+    check_every: 24h
+    webhook_token: ((webhook-token))
+    source:
+      repository: leafdevelop-ch/springboot-starter-ci
+      base_branch: develop
+      access_token: ((github-access-token))
+
+---
+
+
